@@ -16,8 +16,6 @@
         button:hover { background: #218838; }
         .cam-btn { background: #17a2b8; }
         .cam-btn:hover { background: #138496; }
-        .switch-btn { background: #007bff; }
-        .switch-btn:hover { background: #0056b3; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
         .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 10px; border-radius: 8px; max-height: 220px; overflow-y: auto; }
         .list-box h4 { margin: 0 0 8px 0; color: #856404; }
@@ -32,7 +30,7 @@
 
 <div class="container">
     <h2>CCR Sports Academy</h2>
-    <p>रूपावास (सिरसा) - फोटो सहित हाजरी रिपोर्ट</p>
+    <p>रूपावास (सिरसा) - हाजरी रिपोर्ट</p>
     
     <div class="box">
         <label><b>खिलाड़ी का नाम:</b></label>
@@ -50,15 +48,14 @@
             <option value="Evening">शाम की शिफ्ट (Evening)</option>
         </select>
 
-        <label><b>कैमरा व्यू:</b></label>
+        <label><b>बैक कैमरा व्यू:</b></label>
         <video id="video" autoplay playsinline muted></video>
     </div>
 
-    <button class="cam-btn" onclick="initCamera()">1. कैमरा चालू करें</button>
-    <button class="switch-btn" onclick="switchCamera()">कैमरा बदलो (आगे/पीछे)</button>
+    <button class="cam-btn" onclick="initCamera()">1. बैक कैमरा चालू करें</button>
     <button onclick="markAttendanceWithPhoto()">2. फोटो के साथ हाजरी दर्ज करें</button>
     
-    <p id="statusMessage">पहिले 'कैमरा चालू करें' बटन दबाएं...</p>
+    <p id="statusMessage">पहिले 'बैक कैमरा चालू करें' बटन दबाएं...</p>
 
     <!-- फोटो सहित हाजरी की लिस्ट -->
     <div class="list-box">
@@ -87,7 +84,6 @@
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const status = document.getElementById('statusMessage');
-    let useFrontCamera = false;
     let currentStream = null;
     let attendanceRecords = [];
 
@@ -99,9 +95,10 @@
         }
     }
 
+    // सिर्फ बैक कैमरा चालू करने का फंक्शन
     async function initCamera() {
         status.style.color = "blue";
-        status.innerText = "कैमरा चालू हो रहा है...";
+        status.innerText = "बैक कैमरा चालू हो रहा है...";
 
         try {
             if (currentStream) {
@@ -109,7 +106,7 @@
             }
 
             const constraints = {
-                video: { facingMode: useFrontCamera ? 'user' : 'environment' },
+                video: { facingMode: { exact: "environment" } }, // सिर्फ पीछे वाला कैमरा
                 audio: false
             };
 
@@ -117,17 +114,24 @@
             video.srcObject = currentStream;
             
             status.style.color = "green";
-            status.innerText = "कैमरा चालू है! खिलाड़ी का नाम लिखकर हाजरी लगाएं।";
+            status.innerText = "बैक कैमरा चालू है! खिलाड़ी का नाम लिखकर हाजरी लगाएं।";
         } catch (error) {
-            status.style.color = "red";
-            status.innerText = "कैमरा शुरू नहीं हुआ! परमिशन Allow करें।";
-            console.error("Camera Error:", error);
+            // अगर कुछ फोन में 'exact' से एरर आए तो नॉर्मल environment ट्राई करेगा
+            try {
+                const fallbackConstraints = {
+                    video: { facingMode: 'environment' },
+                    audio: false
+                };
+                currentStream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+                video.srcObject = currentStream;
+                status.style.color = "green";
+                status.innerText = "बैक कैमरा चालू है!";
+            } catch (err) {
+                status.style.color = "red";
+                status.innerText = "कैमरा शुरू नहीं हुआ! परमिशन Allow करें।";
+                console.error("Camera Error:", err);
+            }
         }
-    }
-
-    function switchCamera() {
-        useFrontCamera = !useFrontCamera;
-        initCamera();
     }
 
     function markAttendanceWithPhoto() {
@@ -139,7 +143,7 @@
         }
 
         if (!currentStream) {
-            alert("कृपया पहले 'कैमरा चालू करें' बटन दबाएं!");
+            alert("कृपया पहले 'बैक कैमरा चालू करें' बटन दबाएं!");
             return;
         }
 
