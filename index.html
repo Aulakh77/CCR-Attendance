@@ -13,8 +13,10 @@
         .box { background: #e9ecef; padding: 15px; margin: 15px 0; border-radius: 8px; text-align: left; }
         select, input { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         video { width: 100%; border-radius: 8px; background: #000; margin-bottom: 10px; }
-        button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 8px; }
         button:hover { background: #218838; }
+        .switch-btn { background: #007bff; }
+        .switch-btn:hover { background: #0056b3; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
         .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 10px; border-radius: 8px; max-height: 150px; overflow-y: auto; }
         .list-box h4 { margin: 0 0 5px 0; color: #856404; }
@@ -48,6 +50,7 @@
     </div>
 
     <button onclick="startAutoAttendance()">हाजरी स्कैनर चालू करें</button>
+    <button class="switch-btn" onclick="switchCamera()">कैमरा बदलो (आगे/पीछे)</button>
     <p id="statusMessage">कैमरा चालू करने के लिए बटन दबाएं...</p>
 
     <!-- आज की हाजरी देखने की लिस्ट -->
@@ -76,6 +79,8 @@
     const status = document.getElementById('statusMessage');
     let isScanning = false;
     let attendanceRecords = [];
+    let useFrontCamera = true; // शुरू में फ्रंट कैमरा
+    let currentStream = null;
 
     function speakText(text) {
         if ('speechSynthesis' in window) {
@@ -88,4 +93,5 @@
     async function startAutoAttendance() {
         const nameInput = document.getElementById("playerName").value.trim();
         if (!nameInput) {
-            alert("कृपया पहले खिलाड़ी का
+            alert("कृपया पहले खिलाड़ी का नाम दर्ज करें, फिर स्कैनर चालू
+                  
