@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CCR Sports Academy - Auto Attendance</title>
+    <title>CCR Sports Academy - Photo Attendance</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; text-align: center; }
         .container { max-width: 450px; background: white; margin: auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -19,16 +19,20 @@
         .switch-btn { background: #007bff; }
         .switch-btn:hover { background: #0056b3; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
-        .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 10px; border-radius: 8px; max-height: 150px; overflow-y: auto; }
-        .list-box h4 { margin: 0 0 5px 0; color: #856404; }
-        ul { padding-left: 20px; margin: 0; font-size: 14px; }
+        .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 10px; border-radius: 8px; max-height: 220px; overflow-y: auto; }
+        .list-box h4 { margin: 0 0 8px 0; color: #856404; }
+        ul { padding-left: 0; list-style: none; margin: 0; }
+        li { display: flex; align-items: center; background: white; margin-bottom: 8px; padding: 8px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: left; }
+        li img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid #28a745; }
+        li div { font-size: 13px; color: #333; }
+        li strong { font-size: 15px; color: #000; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>CCR Sports Academy</h2>
-    <p>रूपावास (सिरसा) - ऑटोमैटिक हाजरी</p>
+    <p>रूपावास (सिरसा) - फोटो सहित हाजरी रिपोर्ट</p>
     
     <div class="box">
         <label><b>खिलाड़ी का नाम:</b></label>
@@ -50,20 +54,22 @@
         <video id="video" autoplay playsinline muted></video>
     </div>
 
-    <button class="cam-btn" onclick="initCamera()">1. कैमरा चालू करें (Start Camera)</button>
+    <button class="cam-btn" onclick="initCamera()">1. कैमरा चालू करें</button>
     <button class="switch-btn" onclick="switchCamera()">कैमरा बदलो (आगे/पीछे)</button>
-    <button onclick="markAttendance()">2. ऑटोमैटिक हाजरी दर्ज करें</button>
+    <button onclick="markAttendanceWithPhoto()">2. फोटो के साथ हाजरी दर्ज करें</button>
     
     <p id="statusMessage">पहिले 'कैमरा चालू करें' बटन दबाएं...</p>
 
-    <!-- आज की हाजरी की लिस्ट -->
+    <!-- फोटो सहित हाजरी की लिस्ट -->
     <div class="list-box">
-        <h4>📋 आज की दर्ज हाजरी:</h4>
+        <h4>📋 आज की दर्ज हाजरी (फोटो सहित):</h4>
         <ul id="attendanceList">
             <li>अभी कोई हाजरी नहीं लगी है।</li>
         </ul>
     </div>
 </div>
+
+<canvas id="canvas" style="display:none;"></canvas>
 
 <script>
     function checkShift() {
@@ -79,8 +85,9 @@
     checkShift();
 
     const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
     const status = document.getElementById('statusMessage');
-    let useFrontCamera = false; // ग्राउंड के लिए डिफ़ॉल्ट बैक कैमरा
+    let useFrontCamera = false;
     let currentStream = null;
     let attendanceRecords = [];
 
@@ -92,10 +99,9 @@
         }
     }
 
-    // कैमरा चालू करने का पक्का फंक्शन
     async function initCamera() {
         status.style.color = "blue";
-        status.innerText = "कैमरा चालू हो रहा है, अनुमति दें...";
+        status.innerText = "कैमरा चालू हो रहा है...";
 
         try {
             if (currentStream) {
@@ -114,7 +120,7 @@
             status.innerText = "कैमरा चालू है! खिलाड़ी का नाम लिखकर हाजरी लगाएं।";
         } catch (error) {
             status.style.color = "red";
-            status.innerText = "कैमरा शुरू नहीं हुआ! ब्राउज़र सेटिंग्स में जाकर Camera की Permission Allow करें।";
+            status.innerText = "कैमरा शुरू नहीं हुआ! परमिशन Allow करें।";
             console.error("Camera Error:", error);
         }
     }
@@ -124,7 +130,7 @@
         initCamera();
     }
 
-    function markAttendance() {
+    function markAttendanceWithPhoto() {
         const nameInput = document.getElementById("playerName").value.trim();
         if (!nameInput) {
             alert("कृपया पहले खिलाड़ी का नाम लिखें!");
@@ -137,6 +143,13 @@
             return;
         }
 
+        // वीडियो से फोटो कैप्चर करना
+        canvas.width = video.videoWidth || 300;
+        canvas.height = video.videoHeight || 225;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const photoDataUrl = canvas.toDataURL('image/jpeg');
+
         const shift = document.getElementById("shiftType").value;
         const sport = document.getElementById("sportCategory").value;
         const timeStr = new Date().toLocaleTimeString();
@@ -144,14 +157,17 @@
         status.style.color = "green";
         status.innerText = `सफलतापूर्वक हाजरी दर्ज हुई: ${nameInput} (${shift})`;
 
-        // आवाज बोलना
         speakText(`${nameInput} की हाजरी लग गई है`);
 
-        // लिस्ट में जोड़ना
-        attendanceRecords.unshift({ name: nameInput, sport: sport, shift: shift, time: timeStr });
+        attendanceRecords.unshift({ 
+            name: nameInput, 
+            sport: sport, 
+            shift: shift, 
+            time: timeStr, 
+            photo: photoDataUrl 
+        });
         updateAttendanceUI();
 
-        // नाम वाला डिब्बा खाली करना
         document.getElementById("playerName").value = "";
     }
 
@@ -160,7 +176,13 @@
         listEl.innerHTML = "";
         attendanceRecords.forEach(record => {
             const li = document.createElement("li");
-            li.innerText = `${record.name} - ${record.sport} (${record.shift}) [${record.time}]`;
+            li.innerHTML = `
+                <img src="${record.photo}" alt="Photo">
+                <div>
+                    <strong>${record.name}</strong> (${record.sport})<br>
+                    <small>${record.shift} Shift | [${record.time}]</small>
+                </div>
+            `;
             listEl.appendChild(li);
         });
     }
