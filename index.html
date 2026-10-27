@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CCR Sports Academy - Auto Attendance</title>
-    <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; text-align: center; }
         .container { max-width: 450px; background: white; margin: auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -12,9 +11,11 @@
         p { color: #666; font-size: 14px; }
         .box { background: #e9ecef; padding: 15px; margin: 15px 0; border-radius: 8px; text-align: left; }
         select, input { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
-        video { width: 100%; border-radius: 8px; background: #000; margin-bottom: 10px; }
+        video { width: 100%; height: 250px; border-radius: 8px; background: #000; margin-bottom: 10px; object-fit: cover; }
         button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-top: 8px; }
         button:hover { background: #218838; }
+        .cam-btn { background: #17a2b8; }
+        .cam-btn:hover { background: #138496; }
         .switch-btn { background: #007bff; }
         .switch-btn:hover { background: #0056b3; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
@@ -30,7 +31,7 @@
     <p>रूपावास (सिरसा) - ऑटोमैटिक हाजरी</p>
     
     <div class="box">
-        <label><b>खिलाड़ी का नाम (या रोल नंबर):</b></label>
+        <label><b>खिलाड़ी का नाम:</b></label>
         <input type="text" id="playerName" placeholder="खिलाड़ी का नाम लिखें">
 
         <label><b>खेल (Sport):</b></label>
@@ -45,15 +46,17 @@
             <option value="Evening">शाम की शिफ्ट (Evening)</option>
         </select>
 
-        <label><b>कैमरा (चेहरा दिखाएं):</b></label>
-        <video id="video" autoplay muted playsinline></video>
+        <label><b>कैमरा व्यू:</b></label>
+        <video id="video" autoplay playsinline muted></video>
     </div>
 
-    <button onclick="startAutoAttendance()">हाजरी स्कैनर चालू करें</button>
+    <button class="cam-btn" onclick="initCamera()">1. कैमरा चालू करें (Start Camera)</button>
     <button class="switch-btn" onclick="switchCamera()">कैमरा बदलो (आगे/पीछे)</button>
-    <p id="statusMessage">कैमरा चालू करने के लिए बटन दबाएं...</p>
+    <button onclick="markAttendance()">2. ऑटोमैटिक हाजरी दर्ज करें</button>
+    
+    <p id="statusMessage">पहिले 'कैमरा चालू करें' बटन दबाएं...</p>
 
-    <!-- आज की हाजरी देखने की लिस्ट -->
+    <!-- आज की हाजरी की लिस्ट -->
     <div class="list-box">
         <h4>📋 आज की दर्ज हाजरी:</h4>
         <ul id="attendanceList">
@@ -77,10 +80,9 @@
 
     const video = document.getElementById('video');
     const status = document.getElementById('statusMessage');
-    let isScanning = false;
-    let attendanceRecords = [];
-    let useFrontCamera = true; // शुरू में फ्रंट कैमरा
+    let useFrontCamera = false; // ग्राउंड के लिए डिफ़ॉल्ट बैक कैमरा
     let currentStream = null;
+    let attendanceRecords = [];
 
     function speakText(text) {
         if ('speechSynthesis' in window) {
@@ -90,8 +92,79 @@
         }
     }
 
-    async function startAutoAttendance() {
+    // कैमरा चालू करने का पक्का फंक्शन
+    async function initCamera() {
+        status.style.color = "blue";
+        status.innerText = "कैमरा चालू हो रहा है, अनुमति दें...";
+
+        try {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            const constraints = {
+                video: { facingMode: useFrontCamera ? 'user' : 'environment' },
+                audio: false
+            };
+
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = currentStream;
+            
+            status.style.color = "green";
+            status.innerText = "कैमरा चालू है! खिलाड़ी का नाम लिखकर हाजरी लगाएं।";
+        } catch (error) {
+            status.style.color = "red";
+            status.innerText = "कैमरा शुरू नहीं हुआ! ब्राउज़र सेटिंग्स में जाकर Camera की Permission Allow करें।";
+            console.error("Camera Error:", error);
+        }
+    }
+
+    function switchCamera() {
+        useFrontCamera = !useFrontCamera;
+        initCamera();
+    }
+
+    function markAttendance() {
         const nameInput = document.getElementById("playerName").value.trim();
         if (!nameInput) {
-            alert("कृपया पहले खिलाड़ी का नाम दर्ज करें, फिर स्कैनर चालू
-                  
+            alert("कृपया पहले खिलाड़ी का नाम लिखें!");
+            document.getElementById("playerName").focus();
+            return;
+        }
+
+        if (!currentStream) {
+            alert("कृपया पहले 'कैमरा चालू करें' बटन दबाएं!");
+            return;
+        }
+
+        const shift = document.getElementById("shiftType").value;
+        const sport = document.getElementById("sportCategory").value;
+        const timeStr = new Date().toLocaleTimeString();
+
+        status.style.color = "green";
+        status.innerText = `सफलतापूर्वक हाजरी दर्ज हुई: ${nameInput} (${shift})`;
+
+        // आवाज बोलना
+        speakText(`${nameInput} की हाजरी लग गई है`);
+
+        // लिस्ट में जोड़ना
+        attendanceRecords.unshift({ name: nameInput, sport: sport, shift: shift, time: timeStr });
+        updateAttendanceUI();
+
+        // नाम वाला डिब्बा खाली करना
+        document.getElementById("playerName").value = "";
+    }
+
+    function updateAttendanceUI() {
+        const listEl = document.getElementById("attendanceList");
+        listEl.innerHTML = "";
+        attendanceRecords.forEach(record => {
+            const li = document.createElement("li");
+            li.innerText = `${record.name} - ${record.sport} (${record.shift}) [${record.time}]`;
+            listEl.appendChild(li);
+        });
+    }
+</script>
+
+</body>
+</html>
