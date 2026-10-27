@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CCR Sports Academy - Auto Attendance</title>
-    <!-- Face-API.js library for face recognition -->
     <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; text-align: center; }
@@ -12,11 +11,14 @@
         h2 { color: #d9534f; margin-bottom: 5px; }
         p { color: #666; font-size: 14px; }
         .box { background: #e9ecef; padding: 15px; margin: 15px 0; border-radius: 8px; text-align: left; }
-        select { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        select, input { width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         video { width: 100%; border-radius: 8px; background: #000; margin-bottom: 10px; }
         button { background: #28a745; color: white; border: none; padding: 12px; width: 100%; font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold; }
         button:hover { background: #218838; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
+        .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 10px; border-radius: 8px; max-height: 150px; overflow-y: auto; }
+        .list-box h4 { margin: 0 0 5px 0; color: #856404; }
+        ul { padding-left: 20px; margin: 0; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -26,85 +28,12 @@
     <p>रूपावास (सिरसा) - ऑटोमैटिक हाजरी</p>
     
     <div class="box">
+        <label><b>खिलाड़ी का नाम (या रोल नंबर):</b></label>
+        <input type="text" id="playerName" placeholder="खिलाड़ी का नाम लिखें">
+
         <label><b>खेल (Sport):</b></label>
         <select id="sportCategory">
             <option value="Volleyball">वॉलीबॉल (Volleyball)</option>
             <option value="Athletics">एथलेटिक्स (Athletics)</option>
-        </select>
-
-        <label><b>शिफ्ट (Shift):</b></label>
-        <select id="shiftType" disabled>
-            <option value="Morning">सुबह की शिफ्ट (Morning)</option>
-            <option value="Evening">शाम की शिफ्ट (Evening)</option>
-        </select>
-
-        <label><b>कैमरा (चेहरा दिखाएं):</b></label>
-        <video id="video" autoplay muted playsinline></video>
-    </div>
-
-    <button onclick="startAutoAttendance()">हाजरी स्कैनर चालू करें</button>
-    <p id="statusMessage">कैमरा चालू करने के लिए बटन दबाएं...</p>
-</div>
-
-<script>
-    // ऑटोमैटिक टाइम के हिसाब से शिफ्ट सेट करना
-    function checkShift() {
-        const now = new Date();
-        const hours = now.getHours();
-        const shiftSelect = document.getElementById("shiftType");
-        
-        if (hours < 12) {
-            shiftSelect.value = "Morning";
-        } else {
-            shiftSelect.value = "Evening";
-        }
-    }
-    checkShift();
-
-    const video = document.getElementById('video');
-    const status = document.getElementById('statusMessage');
-
-    async function startAutoAttendance() {
-        status.style.color = "blue";
-        status.innerText = "कैमरा लोड हो रहा है, कृपया प्रतीक्षा करें...";
-
-        try {
-            // मॉडल लोड करना (Face detection AI)
-            await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model/');
+        </select
             
-            // कैमरा चालू करना
-            const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
-            video.srcObject = stream;
-            
-            status.style.color = "green";
-            status.innerText = "कैमरा चालू है! खिलाड़ी सामने आएं...";
-
-            // चेहरा डिटेक्ट करना शुरू करना
-            detectFaceLoop();
-        } catch (error) {
-            status.style.color = "red";
-            status.innerText = "कैमरा शुरू करने में दिक्कत आई। परमिशन चेक करें!";
-            console.error(error);
-        }
-    }
-
-    function detectFaceLoop() {
-        setInterval(async () => {
-            const detections = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions());
-            
-            if (detections) {
-                const shift = document.getElementById("shiftType").value;
-                const sport = document.getElementById("sportCategory").value;
-                
-                // जैसे ही चेहरा कैमरे के सामने आएगा, ऑटोमैटिक हाजरी दर्ज हो जाएगी
-                status.style.color = "green";
-                status.innerText = `सफलतापूर्वक हाजरी दर्ज हुई! (${sport} - ${shift} Shift)`;
-                
-                // यहाँ पर डेटाबेस या Google Sheets में भेजने का कोड जोड़ा जा सकता है
-            }
-        }, 2000); // हर 2 सेकंड में चेहरा चेक करेगा
-    }
-</script>
-
-</body>
-</html>
