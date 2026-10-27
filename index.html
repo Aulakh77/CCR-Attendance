@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CCR Sports Academy - Photo Attendance</title>
+    <title>CCR Sports Academy - PDF Attendance Report</title>
+    <!-- html2pdf library for downloading PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; text-align: center; }
         .container { max-width: 450px; background: white; margin: auto; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -16,6 +18,8 @@
         button:hover { background: #218838; }
         .cam-btn { background: #17a2b8; }
         .cam-btn:hover { background: #138496; }
+        .pdf-btn { background: #d9534f; }
+        .pdf-btn:hover { background: #c9302c; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
         .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 10px; border-radius: 8px; max-height: 220px; overflow-y: auto; }
         .list-box h4 { margin: 0 0 8px 0; color: #856404; }
@@ -28,7 +32,7 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="reportContent">
     <h2>CCR Sports Academy</h2>
     <p>रूपावास (सिरसा) - हाजरी रिपोर्ट</p>
     
@@ -64,6 +68,9 @@
             <li>अभी कोई हाजरी नहीं लगी है।</li>
         </ul>
     </div>
+
+    <!-- PDF डाउनलोड बटन -->
+    <button class="pdf-btn" onclick="downloadPDF()">📥 आज की रिपोर्ट PDF डाउनलोड करें</button>
 </div>
 
 <canvas id="canvas" style="display:none;"></canvas>
@@ -95,7 +102,6 @@
         }
     }
 
-    // सिर्फ बैक कैमरा चालू करने का फंक्शन
     async function initCamera() {
         status.style.color = "blue";
         status.innerText = "बैक कैमरा चालू हो रहा है...";
@@ -106,7 +112,7 @@
             }
 
             const constraints = {
-                video: { facingMode: { exact: "environment" } }, // सिर्फ पीछे वाला कैमरा
+                video: { facingMode: { exact: "environment" } },
                 audio: false
             };
 
@@ -116,7 +122,6 @@
             status.style.color = "green";
             status.innerText = "बैक कैमरा चालू है! खिलाड़ी का नाम लिखकर हाजरी लगाएं।";
         } catch (error) {
-            // अगर कुछ फोन में 'exact' से एरर आए तो नॉर्मल environment ट्राई करेगा
             try {
                 const fallbackConstraints = {
                     video: { facingMode: 'environment' },
@@ -147,7 +152,6 @@
             return;
         }
 
-        // वीडियो से फोटो कैप्चर करना
         canvas.width = video.videoWidth || 300;
         canvas.height = video.videoHeight || 225;
         const ctx = canvas.getContext('2d');
@@ -189,6 +193,25 @@
             `;
             listEl.appendChild(li);
         });
+    }
+
+    // PDF डाउनलोड करने का फंक्शन
+    function downloadPDF() {
+        if (attendanceRecords.length === 0) {
+            alert("डाउनलोड करने के लिए अभी कोई हाजरी दर्ज नहीं है!");
+            return;
+        }
+
+        const element = document.getElementById('reportContent');
+        const opt = {
+            margin:       0.5,
+            filename:     'CCR_Academy_Attendance_Report.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().from(element).save();
     }
 </script>
 
