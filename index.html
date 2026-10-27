@@ -35,5 +35,57 @@
         <select id="sportCategory">
             <option value="Volleyball">वॉलीबॉल (Volleyball)</option>
             <option value="Athletics">एथलेटिक्स (Athletics)</option>
-        </select
-            
+        </select>
+
+        <label><b>शिफ्ट (Shift):</b></label>
+        <select id="shiftType" disabled>
+            <option value="Morning">सुबह की शिफ्ट (Morning)</option>
+            <option value="Evening">शाम की शिफ्ट (Evening)</option>
+        </select>
+
+        <label><b>कैमरा (चेहरा दिखाएं):</b></label>
+        <video id="video" autoplay muted playsinline></video>
+    </div>
+
+    <button onclick="startAutoAttendance()">हाजरी स्कैनर चालू करें</button>
+    <p id="statusMessage">कैमरा चालू करने के लिए बटन दबाएं...</p>
+
+    <!-- आज की हाजरी देखने की लिस्ट -->
+    <div class="list-box">
+        <h4>📋 आज की दर्ज हाजरी:</h4>
+        <ul id="attendanceList">
+            <li>अभी कोई हाजरी नहीं लगी है।</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    function checkShift() {
+        const now = new Date();
+        const hours = now.getHours();
+        const shiftSelect = document.getElementById("shiftType");
+        if (hours < 12) {
+            shiftSelect.value = "Morning";
+        } else {
+            shiftSelect.value = "Evening";
+        }
+    }
+    checkShift();
+
+    const video = document.getElementById('video');
+    const status = document.getElementById('statusMessage');
+    let isScanning = false;
+    let attendanceRecords = [];
+
+    function speakText(text) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'hi-IN';
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    async function startAutoAttendance() {
+        const nameInput = document.getElementById("playerName").value.trim();
+        if (!nameInput) {
+            alert("कृपया पहले खिलाड़ी का
