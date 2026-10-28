@@ -21,13 +21,11 @@
         .pdf-btn:hover { background: #c9302c; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
         
-        .list-box { margin-top: 20px; text-align: left; background: #ffffff; border: 2px solid #ffeeba; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
+        .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
         .list-box h4 { margin: 0 0 10px 0; color: #856404; text-align: center; font-size: 16px; border-bottom: 2px solid #ffeeba; padding-bottom: 5px; }
         ul { padding-left: 0; list-style: none; margin: 0; }
-        li { display: flex; align-items: center; background: #f9f9f9; margin-bottom: 8px; padding: 8px; border-radius: 6px; border: 1px solid #ddd; text-align: left; }
-        li img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid #28a745; flex-shrink: 0; }
-        li div { font-size: 13px; color: #333; }
-        li strong { font-size: 15px; color: #000; }
+        li { background: white; margin-bottom: 8px; padding: 10px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: left; font-size: 14px; }
+        li strong { font-size: 16px; color: #000; }
     </style>
 </head>
 <body>
@@ -56,7 +54,7 @@
         <video id="video" autoplay playsinline muted></video>
     </div>
 
-    <button onclick="markAttendanceWithPhoto()">1. फोटो के साथ हाजरी दर्ज करें</button>
+    <button onclick="markAttendance()">1. हाजरी दर्ज करें</button>
     <button class="cam-btn" onclick="initCamera()">2. बैक कैमरा चालू करें</button>
     
     <p id="statusMessage">पहिले 'बैक कैमरा चालू करें' बटन दबाएं...</p>
@@ -67,16 +65,14 @@
             <h3 style="margin: 0; color: #d9534f;">CCR Sports Academy, Rupawas</h3>
             <p style="margin: 2px 0; font-size: 12px; color: #555;" id="reportDate">दिनांक: --/--/----</p>
         </div>
-        <h4>📋 उपस्थित खिलाड़ियों की फोटो सहित लिस्ट</h4>
+        <h4>📋 उपस्थित खिलाड़ियों की लिस्ट</h4>
         <ul id="attendanceList">
-            <li id="emptyMsg" style="justify-content: center; color: #666; background: transparent; border: none;">अभी कोई हाजरी नहीं लगी है।</li>
+            <li>अभी कोई हाजरी नहीं लगी है।</li>
         </ul>
     </div>
 
     <button class="pdf-btn" onclick="downloadPDF()">📥 सिर्फ हाजरी लिस्ट PDF डाउनलोड करें</button>
 </div>
-
-<canvas id="canvas" style="display:none;"></canvas>
 
 <script>
     const today = new Date().toLocaleDateString('hi-IN');
@@ -95,7 +91,6 @@
     checkShift();
 
     const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
     const status = document.getElementById('statusMessage');
     let currentStream = null;
     let attendanceRecords = [];
@@ -145,24 +140,13 @@
         }
     }
 
-    function markAttendanceWithPhoto() {
+    function markAttendance() {
         const nameInput = document.getElementById("playerName").value.trim();
         if (!nameInput) {
             alert("कृपया पहले खिलाड़ी का नाम लिखें!");
             document.getElementById("playerName").focus();
             return;
         }
-
-        if (!currentStream) {
-            alert("कृपया पहले 'बैक कैमरा चालू करें' बटन दबाएं!");
-            return;
-        }
-
-        canvas.width = video.videoWidth || 300;
-        canvas.height = video.videoHeight || 225;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const photoDataUrl = canvas.toDataURL('image/jpeg');
 
         const shift = document.getElementById("shiftType").value;
         const sport = document.getElementById("sportCategory").value;
@@ -177,8 +161,7 @@
             name: nameInput, 
             sport: sport, 
             shift: shift, 
-            time: timeStr, 
-            photo: photoDataUrl 
+            time: timeStr 
         });
         updateAttendanceUI();
 
@@ -191,11 +174,8 @@
         attendanceRecords.forEach(record => {
             const li = document.createElement("li");
             li.innerHTML = `
-                <img src="${record.photo}" alt="Photo">
-                <div>
-                    <strong>${record.name}</strong> (${record.sport})<br>
-                    <small>${record.shift} Shift | [${record.time}]</small>
-                </div>
+                <strong>${record.name}</strong> (${record.sport})<br>
+                <span>शिफ्ट: ${record.shift} | समय: ${record.time}</span>
             `;
             listEl.appendChild(li);
         });
@@ -210,9 +190,9 @@
         const element = document.getElementById('pdfReportArea');
         const opt = {
             margin:       0.5,
-            filename:     'CCR_Academy_Present_Players_Report.pdf',
+            filename:     'CCR_Academy_Attendance_Report.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            html2canvas:  { scale: 2, useCORS: true },
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
 
