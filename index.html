@@ -21,10 +21,10 @@
         .pdf-btn:hover { background: #c9302c; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
         
-        .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
+        .list-box { margin-top: 20px; text-align: left; background: #ffffff; border: 2px solid #ffeeba; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
         .list-box h4 { margin: 0 0 10px 0; color: #856404; text-align: center; font-size: 16px; border-bottom: 2px solid #ffeeba; padding-bottom: 5px; }
         ul { padding-left: 0; list-style: none; margin: 0; }
-        li { display: flex; align-items: center; background: white; margin-bottom: 8px; padding: 8px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: left; }
+        li { display: flex; align-items: center; background: #f9f9f9; margin-bottom: 8px; padding: 8px; border-radius: 6px; border: 1px solid #ddd; text-align: left; }
         li img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid #28a745; flex-shrink: 0; }
         li div { font-size: 13px; color: #333; }
         li strong { font-size: 15px; color: #000; }
@@ -69,7 +69,7 @@
         </div>
         <h4>📋 उपस्थित खिलाड़ियों की फोटो सहित लिस्ट</h4>
         <ul id="attendanceList">
-            <li id="emptyMsg" style="justify-content: center; color: #666; background: transparent; box-shadow: none;">अभी कोई हाजरी नहीं लगी है।</li>
+            <li id="emptyMsg" style="justify-content: center; color: #666; background: transparent; border: none;">अभी कोई हाजरी नहीं लगी है।</li>
         </ul>
     </div>
 
@@ -212,11 +212,11 @@
             margin:       0.5,
             filename:     'CCR_Academy_Present_Players_Report.pdf',
             image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().from(element).save();
+        html2pdf().from(element).set(opt).save();
     }
 </script>
 
