@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CCR Sports Academy - Attendance Report</title>
-    <!-- html2pdf library -->
+    <title>CCR Sports Academy - Attendance</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; text-align: center; }
@@ -21,10 +20,22 @@
         .pdf-btn { background: #d9534f; }
         .pdf-btn:hover { background: #c9302c; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
-        
-        /* हाजरी लिस्ट का डिब्बा */
         .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
         .list-box h4 { margin: 0 0 10px 0; color: #856404; text-align: center; font-size: 16px; border-bottom: 2px solid #ffeeba; padding-bottom: 5px; }
         ul { padding-left: 0; list-style: none; margin: 0; }
         li { display: flex; align-items: center; background: white; margin-bottom: 8px; padding: 8px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: left; }
-        li img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 12px; border:
+        li img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; margin-right: 12px; border: 2px solid #28a745; flex-shrink: 0; }
+        li div { font-size: 13px; color: #333; }
+        li strong { font-size: 15px; color: #000; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>CCR Sports Academy</h2>
+    <p>रूपावास (सिरसा) - हाजरी सिस्टम</p>
+    
+    <div class="box">
+        <label><b>खिलाड़ी का नाम:</b></label>
+
+        
