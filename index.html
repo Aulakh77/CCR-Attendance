@@ -28,7 +28,6 @@
         li div { font-size: 13px; color: #333; }
         li strong { font-size: 15px; color: #000; }
 
-        /* प्रिंट करते वक्त सिर्फ रिपोर्ट ही दिखेगी */
         @media print {
             body * { visibility: hidden; }
             #pdfReportArea, #pdfReportArea * { visibility: visible; }
@@ -53,7 +52,7 @@
         </select>
 
         <label><b>शिफ्ट (Shift):</b></label>
-        <select id="shiftType" disabled>
+        <select id="shiftType">
             <option value="Morning">सुबह की शिफ्ट (Morning)</option>
             <option value="Evening">शाम की शिफ्ट (Evening)</option>
         </select>
@@ -170,7 +169,7 @@
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const photoDataUrl = canvas.toDataURL('image/jpeg');
 
-        const shift = document.getElementById("shiftType5" || "shiftType").value;
+        const shift = document.getElementById("shiftType").value;
         const sport = document.getElementById("sportCategory").value;
         const timeStr = new Date().toLocaleTimeString();
 
