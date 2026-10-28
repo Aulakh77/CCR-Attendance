@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CCR Sports Academy - Attendance Report</title>
-    <!-- html2pdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f6f9; margin: 0; padding: 20px; text-align: center; }
@@ -22,7 +21,6 @@
         .pdf-btn:hover { background: #c9302c; }
         #statusMessage { margin-top: 15px; font-weight: bold; font-size: 16px; }
         
-        /* हाजरी लिस्ट का डिब्बा */
         .list-box { margin-top: 20px; text-align: left; background: #fff3cd; padding: 15px; border-radius: 8px; max-height: 300px; overflow-y: auto; }
         .list-box h4 { margin: 0 0 10px 0; color: #856404; text-align: center; font-size: 16px; border-bottom: 2px solid #ffeeba; padding-bottom: 5px; }
         ul { padding-left: 0; list-style: none; margin: 0; }
@@ -58,7 +56,6 @@
         <video id="video" autoplay playsinline muted></video>
     </div>
 
-    <!-- बटन ऊपर-नीचे सेट कर दिए हैं -->
     <button onclick="markAttendanceWithPhoto()">1. फोटो के साथ हाजरी दर्ज करें</button>
     <button class="cam-btn" onclick="initCamera()">2. बैक कैमरा चालू करें</button>
     
@@ -72,11 +69,10 @@
         </div>
         <h4>📋 उपस्थित खिलाड़ियों की फोटो सहित लिस्ट</h4>
         <ul id="attendanceList">
-            <li>अभी कोई हाजरी नहीं लगी है।</li>
+            <li id="emptyMsg" style="justify-content: center; color: #666; background: transparent; box-shadow: none;">अभी कोई हाजरी नहीं लगी है।</li>
         </ul>
     </div>
 
-    <!-- PDF डाउनलोड बटन -->
     <button class="pdf-btn" onclick="downloadPDF()">📥 सिर्फ हाजरी लिस्ट PDF डाउनलोड करें</button>
 </div>
 
@@ -207,7 +203,7 @@
 
     function downloadPDF() {
         if (attendanceRecords.length === 0) {
-            alert("डाउनलोड करने के लिए अभी कोई हाजरी दर्ज नहीं है!");
+            alert("डाउनलोड करने के लिए पहले कम से कम एक खिलाड़ी की हाजरी दर्ज करें!");
             return;
         }
 
